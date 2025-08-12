@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axel beta - Simulação de Golpe</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #00FF00;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        #prompt-line {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #00FF00;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        #prompt {
+            color: #00FF00;
+            margin-right: 5px;
+        }
+        #command-input {
+            background-color: transparent;
+            border: none;
+            color: #00FF00;
+            outline: none;
+            flex-grow: 1;
+        }
+
+        #terminal-output {
+            flex-grow: 1;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            display: flex;
+            flex-direction: column; /* Adicionado para que o conteúdo se acumule de baixo para cima */
+        }
+
+        .green { color: #00FF00; }
+        .red { color: #FF0000; }
+        .yellow { color: #FFFF00; }
+        .blue { color: #00FFFF; }
+
+        /* Animação para o "carregamento" */
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        .blinking-cursor {
+            animation: blink 1s step-end infinite;
+        }
+    </style>
+</head>
+<body>
+
+<div id="prompt-line">
+    <span id="prompt">C:\Users\Axel></span>
+    <input type="text" id="command-input" autofocus>
+</div>
+<div id="terminal-output"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const output = document.getElementById('terminal-output');
+    const input = document.getElementById('command-input');
+    const promptSpan = document.getElementById('prompt');
+
+    let saldo = 0;
+    let coleta = [];
+    let pessoas = [];
+    let arquivosColetados = {};
+    let dadosDoVirus = [];
+
+    const comandos = [
+        "help: informa todos os comandos",
+        "sair: finaliza a simulação",
+        "golpear: inicia a simulação",
+        "reset: reseta a simulação",
+        "link: cria links falsos para seu golpe",
+        "localizar: localiza algum dispositivo com ip's coletados",
+        "ip: lista todos os ip's coletados",
+        "saldo: mostra os pontos",
+        "pegar: coleta arquivos de um IP localizado",
+        "vender: vende os arquivos coletados para ganhar saldo",
+        "criar virus: simula um vírus que coleta e-mails e vende dados"
+    ];
+    const tipos = ['Cpf', 'Rg', 'Endereço', 'telefone', 'número do cartão', 'senhas', 'informação da conta bancaria', 'biometria'];
+    const banco = ["Nubank", "Caixa", "Serasa", "Bradesco", "Banco do Brasil"];
+
+    function clearOutput() {
+        output.innerHTML = '';
+    }
+
+    async function writeToOutputWithDelay(text, colorClass = 'green', delay = 0) {
+        const p = document.createElement('p');
+        p.className = colorClass;
+        output.appendChild(p);
+
+        const chars = text.split('');
+        for (const char of chars) {
+            p.textContent += char;
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+        output.scrollTop = output.scrollHeight;
+    }
+
+    async function carregamento(tempoTotal) {
+        clearOutput();
+        writeToOutputWithDelay('Aguarde...');
+        const progressBarContainer = document.createElement('p');
+        progressBarContainer.className = 'green';
+        output.appendChild(progressBarContainer);
+
+        for (let i = 0; i <= tempoTotal; i++) {
+            const porcentagem = parseInt((i / tempoTotal) * 100);
+            const verdeBar = '🟩'.repeat(Math.floor(porcentagem / 10));
+            const vermelhoBar = '🟥'.repeat(10 - Math.floor(porcentagem / 10));
+            progressBarContainer.innerHTML = `Aguarde...[${verdeBar}${vermelhoBar}] ${porcentagem}%`;
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
+        await writeToOutputWithDelay('Concluído!', 'green');
+    }
+    
+    async function mensagem() {
+        clearOutput();
+        await carregamento(20);
+        const mensagens = [
+            "Verificando integridade do sistema...",
+            "Carregando módulos de segurança...",
+            "Verificando permissões...",
+            "Acesso concedido.",
+            "Estabelecendo conexão com o servidor...",
+            "Servidor encontrado.",
+            "Transmitindo dados criptografados...",
+            "Decriptando resposta...",
+            "Injeção de código em andamento...",
+            "Escaneando arquivos do sistema...",
+            "Dados localizados.",
+            "Finalizando processo...",
+            "Operação concluída com sucesso."
+        ];
+        
+        for (const msg of mensagens) {
+            await writeToOutputWithDelay(`> ${msg}`, 'green', 15);
+            await new Promise(resolve => setTimeout(resolve, 400));
+        }
+        await writeToOutputWithDelay(">>> Sistema pronto para comandos.", 'green');
+    }
+
+    async function checarDeteccao(chance) {
+        if (Math.random() < chance) {
+            clearOutput();
+            await writeToOutputWithDelay("!!! ALERTA: SUAS ATIVIDADES FORAM DETECTADAS! !!!", 'red', 15);
+            await writeToOutputWithDelay("As autoridades estão no seu encalço! Você precisou se esconder e perdeu recursos.", 'red', 15);
+            const perda = Math.floor(Math.random() * 1501) + 500;
+            saldo -= perda;
+            await writeToOutputWithDelay(`Você perdeu ${perda.toFixed(2)} pontos. Saldo atual: ${saldo.toFixed(2)}`, 'red', 15);
+            
+            coleta = [];
+            pessoas = [];
+            arquivosColetados = {};
+            dadosDoVirus = [];
+            
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            await mensagem();
+            return true;
+        }
+        return false;
+    }
+    
+    function link() {
+        const dominios = ["google.com", "youtube.com", "facebook.com", "amazon.com", "microsoft.com"];
+        const caminhos = ["/login", "/verificar-conta", "/oferta", "/promoção", "/cadastro", "/segurança"];
+        const extensoes = ["", ".php", ".html", ".asp"];
+        const dominioFalso = dominios[Math.floor(Math.random() * dominios.length)].replace(".", ":/.");
+        const caminhoFalso = caminhos[Math.floor(Math.random() * caminhos.length)];
+        const extensao = extensoes[Math.floor(Math.random() * extensoes.length)];
+        return `https://${dominioFalso}${caminhoFalso}${extensao}`;
+    }
+
+    async function monitorarLinks() {
+        const vitimas = ["Lucas", "Mariana", "Pedro", "Jéssica", "Gabriel", "Clara"];
+        const locais = ["São Paulo", "Rio de Janeiro", "Belo Horizonte", "Recife", "Curitiba"];
+        const dispositivos = ["Android", "iPhone", "Windows 10", "Windows 11", "Linux", "MacOS"];
+        
+        clearOutput();
+        await writeToOutputWithDelay("Monitorando atividade dos links...", 'green', 15);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        for (let i = 0; i < Math.floor(Math.random() * 5) + 3; i++) {
+            const nome = vitimas[Math.floor(Math.random() * vitimas.length)];
+            const cidade = locais[Math.floor(Math.random() * locais.length)];
+            const ip = `${Math.floor(Math.random() * 156) + 100}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
+            const dispositivo = dispositivos[Math.floor(Math.random() * dispositivos.length)];
+            
+            await writeToOutputWithDelay("[ACESSO DETECTADO]", 'blue', 15);
+            await writeToOutputWithDelay(`Vítima: ${nome} | IP: ${ip} | Localização: ${cidade} | Dispositivo: ${dispositivo}`, 'green', 15);
+            pessoas.push(nome);
+            coleta.push(ip);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+        
+        await writeToOutputWithDelay("\n>>> Monitoramento finalizado. Dados simulados coletados com sucesso!\n", 'green', 15);
+        await mapaSimulado();
+    }
+
+    async function mapaSimulado() {
+        const cidades = ["SP", "RJ", "BH", "SSA", "REC", "CTB", "POA", "DF", "MAO", "FOR"];
+        const mapaBase = `
+        ╔════════════════════════════════╗
+        ║                                ║
+        ║   SP      RJ                   ║
+        ║    ●       ●                   ║
+        ║                                ║
+        ║       BH                       ║
+        ║        ●                       ║
+        ║                                ║
+        ║   SSA       REC                ║
+        ║    ●         ●                 ║
+        ║                                ║
+        ║ CTB   POA     DF               ║
+        ║    ●       ●    ●              ║
+        ║                                ║
+        ║ MAO FOR                        ║
+        ║    ●       ●                   ║
+        ║                                ║
+        ╚════════════════════════════════╝
+        `;
+
+        await writeToOutputWithDelay("Iniciando rastreamento por mapa...", 'green', 15);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await writeToOutputWithDelay(mapaBase);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        for (let i = 0; i < 3; i++) {
+            const cidade = cidades[Math.floor(Math.random() * cidades.length)];
+            await writeToOutputWithDelay(`[Alerta de acesso em ${cidade}] - Rastreando localização...`, 'yellow', 15);
+            await writeToOutputWithDelay("Sinal detectado. Coordenadas aproximadas recebidas!", 'green', 15);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+
+        await writeToOutputWithDelay(">>> Rastreamento por mapa finalizado com sucesso!\n", 'green', 15);
+    }
+
+    async function criarArquivoFalso(ipAlvo) {
+        if (!arquivosColetados[ipAlvo]) {
+            arquivosColetados[ipAlvo] = [];
+        }
+
+        const numArquivos = Math.floor(Math.random() * 20) + 1;
+        await writeToOutputWithDelay(`Coletando ${numArquivos} arquivos do IP ${ipAlvo}...`, 'green', 15);
+        
+        for (let i = 0; i < numArquivos; i++) {
+            const nomeArquivoFalso = `dados_bancarios_confidenciais_${Math.floor(Math.random() * 9000) + 1000}.txt`;
+            arquivosColetados[ipAlvo].push(nomeArquivoFalso);
+            await writeToOutputWithDelay(`Arquivo ${nomeArquivoFalso} criado em arquivos_coletados/${ipAlvo.replace('.', '_')}`, 'green', 15);
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+    
+        await writeToOutputWithDelay(`\n>>> Coleta de arquivos do ${ipAlvo} concluída!\n`, 'green', 15);
+    }
+
+    async function venderArquivos() {
+        let totalArquivos = 0;
+        for (const ip in arquivosColetados) {
+            totalArquivos += arquivosColetados[ip].length;
+        }
+
+        if (totalArquivos === 0) {
+            await writeToOutputWithDelay("Você não tem nenhum arquivo coletado para vender.", 'yellow', 15);
+            return;
+        }
+        
+        clearOutput();
+        await writeToOutputWithDelay("Arquivos coletados prontos para venda:", 'green', 15);
+        for (const ip in arquivosColetados) {
+            await writeToOutputWithDelay(`  IP: ${ip} - ${arquivosColetados[ip].length} arquivos`, 'blue', 15);
+        }
+
+        const confirmar = await promptUser(`Deseja vender todos os ${totalArquivos} arquivos coletados? (s/n): `);
+        
+        if (confirmar.toLowerCase() === 's') {
+            clearOutput();
+            await carregamento(15);
+            const valorBase = 50;
+            const valorTotal = totalArquivos * valorBase;
+            const valorFinal = valorTotal * (1 + (Math.random() * 0.3) - 0.1);
+            
+            saldo += valorFinal;
+            await writeToOutputWithDelay(`Venda concluída! Você vendeu ${totalArquivos} arquivos por ${valorFinal.toFixed(2)} pontos.`, 'green', 15);
+            await writeToOutputWithDelay(`Seu saldo atual é: ${saldo.toFixed(2)}`, 'green', 15);
+            
+            arquivosColetados = {};
+            await writeToOutputWithDelay("Limpeza de arquivos concluída.", 'green', 15);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            await mensagem();
+        } else {
+            clearOutput();
+            await writeToOutputWithDelay("Venda cancelada.", 'yellow', 15);
+        }
+    }
+
+    async function venderDadosFalsos() {
+        if (dadosDoVirus.length === 0) {
+            await writeToOutputWithDelay("Você não tem dados coletados para vender.", 'yellow', 15);
+            return;
+        }
+        
+        clearOutput();
+        await writeToOutputWithDelay("Dados coletados prontos para venda:", 'green', 15);
+        for (const dado of dadosDoVirus) {
+            await writeToOutputWithDelay(`  Informação: '${dado.tipo}' - Valor: '${dado.valor}'`, 'blue', 15);
+        }
+
+        const confirmar = await promptUser(`Deseja tentar vender ${dadosDoVirus.length} dados? (s/n): `);
+        
+        if (confirmar.toLowerCase() === 's') {
+            clearOutput();
+            await carregamento(10);
+            if (await checarDeteccao(0.5)) {
+                return;
+            }
+
+            if (Math.random() < 0.3) {
+                const valorGanho = (Math.floor(Math.random() * 401) + 100) * dadosDoVirus.length;
+                saldo += valorGanho;
+                await writeToOutputWithDelay(`Venda bem-sucedida! Você conseguiu vender os dados por ${valorGanho.toFixed(2)} pontos.`, 'green', 15);
+                await writeToOutputWithDelay(`Seu saldo atual é: ${saldo.toFixed(2)}`, 'green', 15);
+            } else {
+                const valorPerdido = (Math.floor(Math.random() * 151) + 50) * dadosDoVirus.length;
+                saldo -= valorPerdido;
+                await writeToOutputWithDelay(`A venda falhou e você foi penalizado! Perdeu ${valorPerdido.toFixed(2)} pontos.`, 'red', 15);
+                await writeToOutputWithDelay(`Seu saldo atual é: ${saldo.toFixed(2)}`, 'red', 15);
+            }
+            
+            dadosDoVirus = [];
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            await mensagem();
+        } else {
+            clearOutput();
+            await writeToOutputWithDelay("Venda de dados cancelada.", 'yellow', 15);
+        }
+    }
+    
+    function promptUser(message) {
+        return new Promise(resolve => {
+            writeToOutputWithDelay(message, 'green');
+            input.disabled = false;
+            input.focus();
+            
+            const handler = (e) => {
+                if (e.key === 'Enter') {
+                    const value = input.value;
+                    writeToOutputWithDelay(`${promptSpan.textContent} ${value}`, 'green');
+                    input.removeEventListener('keydown', handler);
+                    input.value = '';
+                    input.disabled = true;
+                    resolve(value);
+                }
+            };
+            input.addEventListener('keydown', handler);
+        });
+    }
+
+    async function golp() {
+        clearOutput();
+        const nome = await promptUser('digite seu nome de golpista:');
+        clearOutput();
+        await writeToOutputWithDelay(`obrigado, ${nome}!`, 'green');
+        promptSpan.textContent = `C:\\Users\\${nome}>`;
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        await mensagem();
+
+        let running = true;
+        while (running) {
+            const comando = await promptUser('');
+            
+            clearOutput();
+            await writeToOutputWithDelay(`${promptSpan.textContent} ${comando}`, 'green');
+
+            switch (comando.toLowerCase()) {
+                case 'sair':
+                    await carregamento(40);
+                    running = false;
+                    break;
+                case 'help':
+                    clearOutput();
+                    await writeToOutputWithDelay("comandos disponiveis:", 'green', 15);
+                    for (const c of comandos) {
+                        await writeToOutputWithDelay(`> ${c}`, 'green', 15);
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                    }
+                    break;
+                case 'link':
+                    clearOutput();
+                    for (let i = 0; i < 5; i++) {
+                        await writeToOutputWithDelay(link());
+                    }
+                    const confirmaLink = await promptUser('Deseja publicar esses links?[s/n]:');
+                    if (confirmaLink.toLowerCase() === 's') {
+                        clearOutput();
+                        await carregamento(10);
+                        if (await checarDeteccao(0.15)) continue;
+                        await writeToOutputWithDelay("publicado!!", 'green', 15);
+                        await monitorarLinks();
+                    } else {
+                        clearOutput();
+                        await writeToOutputWithDelay("Resetando...", 'green', 15);
+                    }
+                    break;
+                case 'localizar':
+                    clearOutput();
+                    if (coleta.length === 0) {
+                        await writeToOutputWithDelay("Nenhum IP coletado ainda. Use 'link' para coletar IPs.", 'yellow', 15);
+                        break;
+                    }
+                    await writeToOutputWithDelay("IPs coletados disponíveis para localização:", 'green', 15);
+                    for (const ip of coleta) {
+                        await writeToOutputWithDelay(`  ${coleta.indexOf(ip) + 1}. ${ip}`, 'green', 15);
+                    }
+                    const escolhaLocalizar = await promptUser('Digite o número do IP que deseja localizar:');
+                    const numLocalizar = parseInt(escolhaLocalizar);
+                    if (!isNaN(numLocalizar) && numLocalizar > 0 && numLocalizar <= coleta.length) {
+                        clearOutput();
+                        await writeToOutputWithDelay(`IP ${coleta[numLocalizar - 1]} válido. Iniciando localização...`, 'green', 15);
+                        if (await checarDeteccao(0.2)) continue;
+                        await writeToOutputWithDelay('Abrindo arquivos....', 'green', 15);
+                        await new Promise(resolve => setTimeout(resolve, 3000));
+                        await mensagem();
+                    } else {
+                        await writeToOutputWithDelay('Número de IP inválido. Tente novamente.', 'red', 15);
+                    }
+                    break;
+                case 'ip':
+                    clearOutput();
+                    if (coleta.length === 0) {
+                        await writeToOutputWithDelay("Nenhum IP coletado ainda. Use 'link' para coletar IPs.", 'yellow', 15);
+                    } else {
+                        await writeToOutputWithDelay("IPs coletados:", 'green', 15);
+                        for (let i = 0; i < coleta.length; i++) {
+                            await writeToOutputWithDelay(`${i+1}. ${pessoas[i]}: ${coleta[i]}`, 'green', 15);
+                        }
+                    }
+                    break;
+                case 'saldo':
+                    clearOutput();
+                    await writeToOutputWithDelay(`Saldo total: ${saldo.toFixed(2)} pontos.`, 'green', 15);
+                    break;
+                case 'pegar':
+                    clearOutput();
+                    if (coleta.length === 0) {
+                        await writeToOutputWithDelay("Nenhum IP coletado para 'pegar' arquivos. Use 'link' primeiro.", 'yellow', 15);
+                        break;
+                    }
+                    await writeToOutputWithDelay("IPsdisponíveis para coletar arquivos:", 'green', 15);
+                    for (const ip of coleta) {
+                        await writeToOutputWithDelay(`  ${coleta.indexOf(ip) + 1}. ${ip}`, 'green', 15);
+                    }
+                    const escolhaPegar = await promptUser('Digite o número do IP para "pegar" arquivos:');
+                    const numPegar = parseInt(escolhaPegar);
+                    if (!isNaN(numPegar) && numPegar > 0 && numPegar <= coleta.length) {
+                        clearOutput();
+                        await carregamento(10);
+                        if (await checarDeteccao(0.25)) continue;
+                        await criarArquivoFalso(coleta[numPegar - 1]);
+                    } else {
+                        await writeToOutputWithDelay('Número de IP inválido. Tente novamente.', 'red', 15);
+                    }
+                    break;
+                case 'vender':
+                    clearOutput();
+                    const escolhaVender = await promptUser('deseja vender\n[1-arquivos]\n[2-dados]:');
+                    if (escolhaVender === '1') {
+                        await venderArquivos();
+                    } else if (escolhaVender === '2') {
+                        await venderDadosFalsos();
+                    } else {
+                        await writeToOutputWithDelay(`ERRO AO VENDER ARQUIVO`, 'red', 15);
+                    }
+                    break;
+                case 'criar virus':
+                    clearOutput();
+                    await writeToOutputWithDelay("criando virus.....", 'green', 15);
+                    await carregamento(1);
+                    await writeToOutputWithDelay("virus criado!", 'green', 15);
+                    const assunto = banco[Math.floor(Math.random() * banco.length)];
+                    await writeToOutputWithDelay(`Simulando envio de e-mail com assunto: Banco:${assunto}`, 'green', 15);
+                    if (await checarDeteccao(0.30)) continue;
+                    await writeToOutputWithDelay("Coleta de dados simulada para o virus.", 'green', 15);
+                    await writeToOutputWithDelay("Escolha o tipo de dado a ser coletado:", 'green', 15);
+                    for (const tipo of tipos) {
+                        await writeToOutputWithDelay(`${tipos.indexOf(tipo)+1}. ${tipo}`, 'green', 15);
+                    }
+                    const escolhaTipo = await promptUser('Insira o número do tipo de dado que você coletou:');
+                    const numTipo = parseInt(escolhaTipo);
+                    if (!isNaN(numTipo) && numTipo > 0 && numTipo <= tipos.length) {
+                        const tipoColetado = tipos[numTipo - 1];
+                        const valorDado = await promptUser(`Insira o valor do ${tipoColetado} (ex: 123.456.789-00 ou 1234.56):`);
+                        dadosDoVirus.push({tipo: tipoColetado, valor: valorDado});
+                        await writeToOutputWithDelay(`Dado: '${tipoColetado}' com valor '${valorDado}' coletado com sucesso!`, 'green', 15);
+                    } else {
+                        await writeToOutputWithDelay('Número de tipo de dado inválido.', 'red', 15);
+                    }
+                    break;
+                default:
+                    clearOutput();
+                    await writeToOutputWithDelay(`Fatal Error: "${comando}". Comando inválido.`, 'red', 15);
+            }
+        }
+    }
+
+    async function mainLoop() {
+        let running = true;
+        while (running) {
+            const comando = await promptUser('');
+            
+            clearOutput();
+            await writeToOutputWithDelay(`C:\\Users\\Axel> ${comando}`, 'green', 15);
+
+            switch (comando.toLowerCase()) {
+                case 'sair':
+                    await carregamento(10);
+                    clearOutput();
+                    await writeToOutputWithDelay("Obrigado por jogar ❤️", 'green', 15);
+                    running = false;
+                    break;
+                case 'golpear':
+                    await carregamento(30);
+                    await golp();
+                    break;
+                case 'reset':
+                    clearOutput();
+                    await writeToOutputWithDelay("Simulação resetada!", 'green', 15);
+                    saldo = 0;
+                    coleta = [];
+                    pessoas = [];
+                    arquivosColetados = {};
+                    dadosDoVirus = [];
+                    await writeToOutputWithDelay("Pastas de arquivos coletados removidas.", 'green', 15);
+                    break;
+                case 'help':
+                    clearOutput();
+                    await writeToOutputWithDelay("comandos disponiveis:", 'green', 15);
+                    for (const c of comandos) {
+                        await writeToOutputWithDelay(`> ${c}`, 'green', 15);
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                    }
+                    break;
+                default:
+                    clearOutput();
+                    await writeToOutputWithDelay(`Fatal Error: "${comando}". Comando inválido.`, 'red', 15);
+            }
+        }
+    }
+    
+    // Inicia o loop principal do jogo
+    mainLoop();
+});
+</script>
+
+</body>
+</html>
