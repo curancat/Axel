@@ -40,7 +40,7 @@
             overflow-y: auto;
             white-space: pre-wrap;
             display: flex;
-            flex-direction: column; /* Adicionado para que o conteúdo se acumule de baixo para cima */
+            flex-direction: column;
         }
 
         .green { color: #00FF00; }
@@ -48,7 +48,6 @@
         .yellow { color: #FFFF00; }
         .blue { color: #00FFFF; }
 
-        /* Animação para o "carregamento" */
         @keyframes blink {
             50% { opacity: 0; }
         }
@@ -65,7 +64,10 @@
 </div>
 <div id="terminal-output"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script>
+    alert("use [help] para informações dos comandos\nuse [golpear] para iniciar o simulador")
 document.addEventListener('DOMContentLoaded', () => {
     const output = document.getElementById('terminal-output');
     const input = document.getElementById('command-input');
@@ -256,14 +258,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const numArquivos = Math.floor(Math.random() * 20) + 1;
         await writeToOutputWithDelay(`Coletando ${numArquivos} arquivos do IP ${ipAlvo}...`, 'green', 15);
         
+        const zip = new JSZip();
         for (let i = 0; i < numArquivos; i++) {
             const nomeArquivoFalso = `dados_bancarios_confidenciais_${Math.floor(Math.random() * 9000) + 1000}.txt`;
+            const conteudoFalso = `Informações bancárias simuladas para ${ipAlvo} - Arquivo ${i+1}`;
             arquivosColetados[ipAlvo].push(nomeArquivoFalso);
-            await writeToOutputWithDelay(`Arquivo ${nomeArquivoFalso} criado em arquivos_coletados/${ipAlvo.replace('.', '_')}`, 'green', 15);
+            await writeToOutputWithDelay(`Arquivo ${nomeArquivoFalso} coletado.`, 'green', 15);
+            zip.file(nomeArquivoFalso, conteudoFalso);
             await new Promise(resolve => setTimeout(resolve, 100));
         }
-    
-        await writeToOutputWithDelay(`\n>>> Coleta de arquivos do ${ipAlvo} concluída!\n`, 'green', 15);
+        
+        await writeToOutputWithDelay(`\n>>> Coleta de arquivos do ${ipAlvo} concluída!`, 'green', 15);
+        await writeToOutputWithDelay(`Gerando arquivo zip para download...`, 'green', 15);
+
+        zip.generateAsync({type:"blob"})
+            .then(function (content) {
+                const downloadLink = document.createElement('a');
+                downloadLink.className = 'green';
+                downloadLink.href = URL.createObjectURL(content);
+                downloadLink.download = `arquivos_coletados_${ipAlvo.replace('.', '_')}.zip`;
+                downloadLink.textContent = 'Clique aqui para baixar os arquivos coletados!';
+                output.appendChild(downloadLink);
+                output.scrollTop = output.scrollHeight;
+                window.setTimeout(() => URL.revokeObjectURL(downloadLink.href), 1000);
+            });
     }
 
     async function venderArquivos() {
@@ -441,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'ip':
                     clearOutput();
                     if (coleta.length === 0) {
-                        await writeToOutputWithDelay("Nenhum IP coletado ainda. Use 'link' para coletar IPs.", 'yellow', 15);
+                        await writeToOutputWithDelay("Nenhum IP coletado ainda. Usse 'link' para coletar IPs.", 'yellow', 15);
                     } else {
                         await writeToOutputWithDelay("IPs coletados:", 'green', 15);
                         for (let i = 0; i < coleta.length; i++) {
@@ -459,7 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         await writeToOutputWithDelay("Nenhum IP coletado para 'pegar' arquivos. Use 'link' primeiro.", 'yellow', 15);
                         break;
                     }
-                    await writeToOutputWithDelay("IPsdisponíveis para coletar arquivos:", 'green', 15);
+                    await writeToOutputWithDelay("IPs disponiveis para coletar arquivos:", 'green', 15);
                     for (const ip of coleta) {
                         await writeToOutputWithDelay(`  ${coleta.indexOf(ip) + 1}. ${ip}`, 'green', 15);
                     }
@@ -490,24 +508,52 @@ document.addEventListener('DOMContentLoaded', () => {
                     await writeToOutputWithDelay("criando virus.....", 'green', 15);
                     await carregamento(1);
                     await writeToOutputWithDelay("virus criado!", 'green', 15);
-                    const assunto = banco[Math.floor(Math.random() * banco.length)];
-                    await writeToOutputWithDelay(`Simulando envio de e-mail com assunto: Banco:${assunto}`, 'green', 15);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    await writeToOutputWithDelay("Conectando ao assistente de IA para a operação...", 'green', 15);
+                    
                     if (await checarDeteccao(0.30)) continue;
-                    await writeToOutputWithDelay("Coleta de dados simulada para o virus.", 'green', 15);
-                    await writeToOutputWithDelay("Escolha o tipo de dado a ser coletado:", 'green', 15);
-                    for (const tipo of tipos) {
-                        await writeToOutputWithDelay(`${tipos.indexOf(tipo)+1}. ${tipo}`, 'green', 15);
+
+                    let chatRunning = true;
+                    await writeToOutputWithDelay("AI: Olá, golpista. Minha função é otimizar sua coleta de dados. Por favor, forneça as informações do alvo.", 'blue', 15);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    while(chatRunning) {
+                        const userMessage = await promptUser('Você:');
+                        clearOutput();
+
+                        if (userMessage.toLowerCase().includes('ajuda')) {
+                            await writeToOutputWithDelay("AI: Minha ajuda se baseia em encontrar e-mails vulneráveis e coletar dados específicos. Confirme se está pronto.", 'blue', 15);
+                        } else if (userMessage.toLowerCase().includes('pronto') || userMessage.toLowerCase().includes('sim')) {
+                            await writeToOutputWithDelay("AI: Excelente. Iniciando varredura de e-mails...", 'blue', 15);
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            await writeToOutputWithDelay("AI: Varredura concluída. Qual tipo de dado você deseja coletar primeiro?", 'blue', 15);
+                            chatRunning = false;
+                        } else if (userMessage.toLowerCase().includes('sair')) {
+                            await writeToOutputWithDelay("AI: Entendido. Encerrando sessão. Você pode voltar ao terminal principal.", 'blue', 15);
+                            chatRunning = false;
+                        } else {
+                            await writeToOutputWithDelay("AI: Não entendi. Por favor, seja mais específico ou digite 'ajuda'.", 'blue', 15);
+                        }
                     }
-                    const escolhaTipo = await promptUser('Insira o número do tipo de dado que você coletou:');
-                    const numTipo = parseInt(escolhaTipo);
-                    if (!isNaN(numTipo) && numTipo > 0 && numTipo <= tipos.length) {
-                        const tipoColetado = tipos[numTipo - 1];
-                        const valorDado = await promptUser(`Insira o valor do ${tipoColetado} (ex: 123.456.789-00 ou 1234.56):`);
-                        dadosDoVirus.push({tipo: tipoColetado, valor: valorDado});
-                        await writeToOutputWithDelay(`Dado: '${tipoColetado}' com valor '${valorDado}' coletado com sucesso!`, 'green', 15);
-                    } else {
-                        await writeToOutputWithDelay('Número de tipo de dado inválido.', 'red', 15);
+
+                    if (!chatRunning) {
+                        await writeToOutputWithDelay("Coleta de dados simulada para o virus.", 'green', 15);
+                        await writeToOutputWithDelay("Escolha o tipo de dado a ser coletado:", 'green', 15);
+                        for (const tipo of tipos) {
+                            await writeToOutputWithDelay(`${tipos.indexOf(tipo)+1}. ${tipo}`, 'green', 15);
+                        }
+                        const escolhaTipo = await promptUser('Insira o número do tipo de dado que você coletou:');
+                        const numTipo = parseInt(escolhaTipo);
+                        if (!isNaN(numTipo) && numTipo > 0 && numTipo <= tipos.length) {
+                            const tipoColetado = tipos[numTipo - 1];
+                            const valorDado = await promptUser(`Insira o valor do ${tipoColetado} (ex: 123.456.789-00 ou 1234.56):`);
+                            dadosDoVirus.push({tipo: tipoColetado, valor: valorDado});
+                            await writeToOutputWithDelay(`Dado: '${tipoColetado}' com valor '${valorDado}' coletado com sucesso!`, 'green', 15);
+                        } else {
+                            await writeToOutputWithDelay('Número de tipo de dado inválido.', 'red', 15);
+                        }
                     }
+
                     break;
                 default:
                     clearOutput();
@@ -560,7 +606,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Inicia o loop principal do jogo
     mainLoop();
 });
 </script>
