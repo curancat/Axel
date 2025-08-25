@@ -126,14 +126,16 @@
             font-size: 1em;
             color: #ccc;
         }
-
+        mark{
+            background-color:#ff2400;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Proteja-se de Golpes Virtuais</h1>
-    <p>Baixe nosso simulador de golpes para aprender na prática como identificar e se proteger de ameaças na internet. A melhor defesa é o conhecimento.</p>
+    <p>Baixe nosso simulador de golpes para aprender na prática como identificar e se proteger de ameaças na internet.</p>
     <button id="openModalBtn" class="download-btn">Baixar Simulador</button>
 </div>
 
@@ -142,39 +144,28 @@
         <span class="close-btn">&times;</span>
         <h2>Sobre o Arquivo</h2>
         <p>
-            Você está prestes a baixar o arquivo **"axel.exe"**. 
+            Você está prestes a baixar o arquivo <strong>"axel.exe"</strong>. 
         </p>
         <p>
-            Este arquivo não é um vírus. Ele é um **simulador de golpes virtuais** criado com o objetivo de **educar e conscientizar** sobre as táticas usadas por criminosos. Ao executá-lo, você verá exemplos de como os golpes acontecem, o que vai te ajudar a reconhecer essas situações no mundo real e se proteger.
+            Este arquivo não é um vírus. Ele é um <strong>simulador de golpes virtuais</strong>criado com o objetivo de <strong>educar e conscientizar</strong>sobre as táticas usadas por criminosos. Ao executá-lo, você verá exemplos de como os golpes acontecem, o que vai te ajudar a reconhecer essas situações no mundo real e se proteger.
         </p>
         <p>
-            **Aviso:** O Windows ou seu antivírus pode alertar sobre o arquivo, já que ele simula comportamentos de programas maliciosos para fins de aprendizado. Você deve prosseguir com a instalação por sua conta e risco, apenas com a intenção de estudo.
+            <strong><mark>Aviso</mark></strong> O Windows ou seu antivírus pode alertar sobre o arquivo, já que ele simula comportamentos de programas maliciosos para fins de aprendizado. Você deve prosseguir com a instalação por sua conta e risco, apenas com a intenção de estudo.
         </p>
         <a href="./axel.exe" class="download-btn" style="margin-top: 20px;">Confirmar e Baixar</a>
     </div>
 </div>
 
 <script>
-    // Obtém o modal
     var modal = document.getElementById("infoModal");
-
-    // Obtém o botão que abre o modal
     var btn = document.getElementById("openModalBtn");
-
-    // Obtém o elemento <span> que fecha o modal
     var span = document.getElementsByClassName("close-btn")[0];
-
-    // Quando o usuário clica no botão, abre o modal
     btn.onclick = function() {
       modal.style.display = "flex";
     }
-
-    // Quando o usuário clica no <span> (x), fecha o modal
     span.onclick = function() {
       modal.style.display = "none";
     }
-
-    // Quando o usuário clica em qualquer lugar fora do modal, fecha-o
     window.onclick = function(event) {
       if (event.target == modal) {
         modal.style.display = "none";
