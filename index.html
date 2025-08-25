@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axel--Aprenda a se defender de golpes</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        :root {
+            --roxo-principal: #6a0dad;
+            --azul-escuro: #0a0a2a;
+            --vermelho-escarlate: #ff2400;
+            --dourado: #ffc200;
+            --amarelo-claro: #ffe066;
+            --branco: #ffffff;
+            --preto: #000000;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, var(--azul-escuro), var(--preto), var(--roxo-principal));
+            color: var(--branco);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        .container {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border-radius: 15px;
+            border: 2px solid var(--roxo-principal);
+            box-shadow: 0 0 30px var(--roxo-principal);
+            max-width: 600px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: var(--dourado);
+            text-shadow: 2px 2px 4px var(--preto);
+            margin-bottom: 20px;
+        }
+        
+        p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: var(--branco);
+        }
+
+        .download-btn {
+            background-color: var(--vermelho-escarlate);
+            color: var(--branco);
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            margin-top: 30px;
+            border: 2px solid var(--amarelo-claro);
+        }
+
+        .download-btn:hover {
+            background-color: #e61c00;
+            transform: scale(1.05);
+            border-color: var(--dourado);
+        }
+
+        /* Pop-up (modal) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--azul-escuro);
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            text-align: left;
+            border: 2px solid var(--roxo-principal);
+            box-shadow: 0 0 20px var(--roxo-principal);
+            position: relative;
+        }
+
+        .close-btn {
+            color: var(--branco);
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            color: var(--vermelho-escarlate);
+        }
+
+        .modal-content h2 {
+            color: var(--dourado);
+            margin-top: 0;
+        }
+
+        .modal-content p {
+            font-size: 1em;
+            color: #ccc;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Proteja-se de Golpes Virtuais</h1>
+    <p>Baixe nosso simulador de golpes para aprender na prática como identificar e se proteger de ameaças na internet. A melhor defesa é o conhecimento.</p>
+    <button id="openModalBtn" class="download-btn">Baixar Simulador</button>
+</div>
+
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>Sobre o Arquivo</h2>
+        <p>
+            Você está prestes a baixar o arquivo **"axel.exe"**. 
+        </p>
+        <p>
+            Este arquivo não é um vírus. Ele é um **simulador de golpes virtuais** criado com o objetivo de **educar e conscientizar** sobre as táticas usadas por criminosos. Ao executá-lo, você verá exemplos de como os golpes acontecem, o que vai te ajudar a reconhecer essas situações no mundo real e se proteger.
+        </p>
+        <p>
+            **Aviso:** O Windows ou seu antivírus pode alertar sobre o arquivo, já que ele simula comportamentos de programas maliciosos para fins de aprendizado. Você deve prosseguir com a instalação por sua conta e risco, apenas com a intenção de estudo.
+        </p>
+        <a href="./axel.exe" class="download-btn" style="margin-top: 20px;">Confirmar e Baixar</a>
+    </div>
+</div>
+
+<script>
+    // Obtém o modal
+    var modal = document.getElementById("infoModal");
+
+    // Obtém o botão que abre o modal
+    var btn = document.getElementById("openModalBtn");
+
+    // Obtém o elemento <span> que fecha o modal
+    var span = document.getElementsByClassName("close-btn")[0];
+
+    // Quando o usuário clica no botão, abre o modal
+    btn.onclick = function() {
+      modal.style.display = "flex";
+    }
+
+    // Quando o usuário clica no <span> (x), fecha o modal
+    span.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    // Quando o usuário clica em qualquer lugar fora do modal, fecha-o
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+</script>
+
+</body>
+</html>
