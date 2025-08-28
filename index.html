@@ -137,6 +137,7 @@
     <h1>Proteja-se de Golpes Virtuais</h1>
     <p>Baixe nosso simulador de golpes para aprender na prática como identificar e se proteger de ameaças na internet.</p>
     <button id="openModalBtn" class="download-btn">Baixar Simulador</button>
+    <button id="helpBtn" class="download-btn" style="background-color: var(--roxo-principal); margin-top: 15px;">Dúvidas?</button>
 </div>
 
 <div id="infoModal" class="modal">
@@ -160,6 +161,8 @@
     var modal = document.getElementById("infoModal");
     var btn = document.getElementById("openModalBtn");
     var span = document.getElementsByClassName("close-btn")[0];
+    var helpBtn = document.getElementById("helpBtn");
+    
     btn.onclick = function() {
       modal.style.display = "flex";
     }
@@ -171,6 +174,14 @@
         modal.style.display = "none";
       }
     }
+helpBtn.onclick = function() {
+    var duvida = prompt("Qual é a sua dúvida?");
+    if (duvida) {
+        alert("Obrigado! Sua dúvida: '" + duvida + "' foi registrada. Responderemos em breve!");
+    } else {
+        alert("Nenhuma dúvida foi digitada. Se precisar, volte e nos pergunte!");
+    }
+}
 </script>
 
 </body>
