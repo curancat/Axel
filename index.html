@@ -174,12 +174,24 @@
         modal.style.display = "none";
       }
     }
+var helpBtn = document.getElementById("helpBtn");
+
 helpBtn.onclick = function() {
-    var duvida = prompt("Qual é a sua dúvida?");
-    if (duvida) {
-        alert("Obrigado! Sua dúvida: '" + duvida + "' foi registrada. Responderemos em breve!");
-    } else {
-        alert("Nenhuma dúvida foi digitada. Se precisar, volte e nos pergunte!");
+    var duvida = prompt("Olá! Como posso ajudar?\n\nDigite o número da sua opção:\n1 - Quais são os comandos?\n2 - O simulador é seguro?\n3 - Sair");
+    
+    switch (duvida) {
+        case '1':
+            alert("Os comandos do simulador são simples.\nhelp-lista os comandos\ngolpear-inicia nossa simulação\n(criar vírus|vender)- processo de coleta de dados\n(link|ip[opcional]|pegar|vender)-processo de coleta de arquivos\nreset- reseta a simulação\nsair- finaliza a simulação\nSiga as instruções que aparecerão na tela para interagir com os exemplos de golpes.");
+            break;
+        case '2':
+            alert("Sim, o simulador é completamente seguro. Ele foi desenvolvido para fins educacionais e não coleta dados pessoais nem danifica seu computador. É normal que o antivírus o identifique como uma ameaça por ele simular comportamentos maliciosos, mas ele não é um vírus.");
+            break;
+        case '3':
+            alert("Até a próxima! Se tiver mais dúvidas, volte e nos chame.");
+            break;
+        default:
+            alert("Opção inválida. Por favor, digite 1, 2 ou 3.");
+            break;
     }
 }
 </script>
